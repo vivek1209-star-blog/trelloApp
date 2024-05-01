@@ -1,23 +1,18 @@
-import logo from './logo.svg';
+import React from 'react';
+import { Button, Container, Row } from 'react-bootstrap';
 import './App.css';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="app-container">
+      <Container fluid>
+        <Row className="justify-content-center">
+          <header className="app-header">
+            <h1>Trello App</h1>
+            <Button variant="light">Add New Card</Button>
+          </header>
+        </Row>
+      </Container>
     </div>
   );
 }

@@ -32,12 +32,10 @@ function App() {
   };
 
   const handleAddCard = (card) => {
-    console.log("card", card)
     const newColumns = {
       ...columns,
       [card.status]: [...columns[card.status], card],
     };
-    console.log("newColumns", newColumns)
     setColumns(newColumns);
     handleCloseModal();
   };
@@ -45,14 +43,16 @@ function App() {
   const handleEditCard = (updatedCard) => {
     if (!updatedCard) return;
 
-    const newColumns = { ...columns };
-    // Remove the card from its current column
-    newColumns[updatedCard.status] = newColumns[updatedCard.status].filter(
-      (card) => card.id !== updatedCard.id
-    );
-    // Add the updated card to its new column
-    newColumns[updatedCard.status].push(updatedCard);
-    setColumns(newColumns);
+    setColumns(prevColumns => {
+      const newColumns = { ...prevColumns };
+      const columnToUpdate = newColumns[updatedCard.status];
+      if (!columnToUpdate) {
+        console.error(`Column with status "${updatedCard.status}" not found.`);
+        return prevColumns;
+      }
+      newColumns[updatedCard.status] = columnToUpdate.map(card => (card.id === updatedCard.id ? updatedCard : card));
+      return newColumns;
+    });
     handleCloseModal();
   };
 
@@ -62,12 +62,27 @@ function App() {
       [card.status]: columns[card.status].filter((c) => c.id !== card.id),
     };
     setColumns(newColumns);
-
-    // Check if no more cards left in the current column
     if (newColumns[card.status].length === 0) {
       setShowModal(false);
     }
   };
+
+  const handleCardDragStart = (e, card) => {
+    e.dataTransfer.setData('card', JSON.stringify(card));
+  };
+
+  const handleCardDragOver = (e) => {
+    e.preventDefault();
+  };
+
+  const handleCardDrop = (e, status) => {
+    const droppedCard = JSON.parse(e.dataTransfer.getData('card'));
+    if (droppedCard.status.toLowerCase() !== status.toLowerCase()) {
+      const updatedCard = { ...droppedCard, status };
+      handleEditCard(updatedCard);
+    }
+  };
+
   return (
     <div className="app-container">
       <Container fluid>
@@ -85,6 +100,9 @@ function App() {
               cards={columns[columnId]}
               onEditClick={handleShowModal}
               onDeleteClick={handleDeleteCard}
+              onCardDragStart={handleCardDragStart}
+              onCardDragOver={handleCardDragOver}
+              onCardDrop={(e) => handleCardDrop(e, columnId)}
             />
           ))}
         </Row>
